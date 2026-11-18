@@ -17,7 +17,9 @@
             android:orientation="vertical"
             android:padding="22dp">
 
+            <!-- App logo -->
             <TextView
+                android:id="@+id/tvLogo"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="BHtravel"
@@ -25,7 +27,9 @@
                 android:textSize="26sp"
                 android:textStyle="bold" />
 
+            <!-- Greeting -->
             <TextView
+                android:id="@+id/tvGreeting"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="28dp"
@@ -35,6 +39,7 @@
                 android:textStyle="bold" />
 
             <TextView
+                android:id="@+id/tvSubtitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="6dp"
@@ -44,6 +49,7 @@
 
             <!-- Featured destination -->
             <FrameLayout
+                android:id="@+id/cardFeaturedDestination"
                 android:layout_width="match_parent"
                 android:layout_height="210dp"
                 android:layout_marginTop="24dp"
@@ -109,6 +115,7 @@
                 android:orientation="horizontal">
 
                 <TextView
+                    android:id="@+id/btnNewTrip"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -118,9 +125,12 @@
                     android:text="＋\nNew Trip"
                     android:textColor="#142B49"
                     android:textSize="15sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true" />
 
                 <TextView
+                    android:id="@+id/btnItinerary"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -130,7 +140,9 @@
                     android:text="▤\nItinerary"
                     android:textColor="#142B49"
                     android:textSize="15sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true" />
 
             </LinearLayout>
 
@@ -142,6 +154,7 @@
                 android:orientation="horizontal">
 
                 <TextView
+                    android:id="@+id/btnBudget"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -151,9 +164,12 @@
                     android:text="€\nBudget"
                     android:textColor="#142B49"
                     android:textSize="15sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true" />
 
                 <TextView
+                    android:id="@+id/btnExplore"
                     android:layout_width="0dp"
                     android:layout_height="match_parent"
                     android:layout_weight="1"
@@ -163,7 +179,9 @@
                     android:text="⌖\nExplore"
                     android:textColor="#142B49"
                     android:textSize="15sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    android:clickable="true"
+                    android:focusable="true" />
 
             </LinearLayout>
 
@@ -178,6 +196,7 @@
                 android:textStyle="bold" />
 
             <LinearLayout
+                android:id="@+id/cardUpcomingMilan"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
@@ -208,6 +227,7 @@
 
     <!-- Bottom navigation -->
     <LinearLayout
+        android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
         android:layout_height="65dp"
         android:background="#FFFFFF"
@@ -215,6 +235,7 @@
         android:orientation="horizontal">
 
         <TextView
+            android:id="@+id/navHome"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
@@ -222,43 +243,57 @@
             android:text="⌂\nHome"
             android:textColor="#168B8B"
             android:textSize="12sp"
-            android:textStyle="bold" />
+            android:textStyle="bold"
+            android:clickable="true"
+            android:focusable="true" />
 
         <TextView
+            android:id="@+id/navTrips"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
             android:text="▣\nTrips"
             android:textColor="#526D78"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:clickable="true"
+            android:focusable="true" />
 
         <TextView
+            android:id="@+id/navExplore"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
             android:text="⌖\nExplore"
             android:textColor="#526D78"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:clickable="true"
+            android:focusable="true" />
 
         <TextView
+            android:id="@+id/navBudget"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
             android:text="€\nBudget"
             android:textColor="#526D78"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:clickable="true"
+            android:focusable="true" />
 
         <TextView
+            android:id="@+id/navProfile"
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:gravity="center"
             android:text="●\nProfile"
             android:textColor="#526D78"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            android:clickable="true"
+            android:focusable="true" />
 
     </LinearLayout>
 
