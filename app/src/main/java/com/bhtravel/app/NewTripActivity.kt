@@ -7,6 +7,11 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.bhtravel.app.data.database.DatabaseProvider
+import com.bhtravel.app.data.entity.TripEntity
+import com.bhtravel.app.data.repository.TripRepository
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -20,6 +25,8 @@ class NewTripActivity : AppCompatActivity() {
 
     private lateinit var btnStartDate: Button
     private lateinit var btnEndDate: Button
+
+    private lateinit var repository: TripRepository
 
     private var startDate: Calendar? = null
     private var endDate: Calendar? = null
@@ -37,6 +44,9 @@ class NewTripActivity : AppCompatActivity() {
 
         btnStartDate = findViewById(R.id.btnStartDate)
         btnEndDate = findViewById(R.id.btnEndDate)
+
+        val database = DatabaseProvider.getDatabase(applicationContext)
+        repository = TripRepository(database.tripDao())
 
         val btnSaveTrip = findViewById<Button>(R.id.btnSaveTrip)
         val btnCancelTrip = findViewById<Button>(R.id.btnCancelTrip)
@@ -65,7 +75,6 @@ class NewTripActivity : AppCompatActivity() {
         val datePicker = DatePickerDialog(
             this,
             { _, year, month, dayOfMonth ->
-
                 val chosenDate = Calendar.getInstance().apply {
                     set(year, month, dayOfMonth, 0, 0, 0)
                     set(Calendar.MILLISECOND, 0)
@@ -151,17 +160,37 @@ class NewTripActivity : AppCompatActivity() {
             return
         }
 
-        val formattedStartDate = dateFormat.format(startDate!!.time)
-        val formattedEndDate = dateFormat.format(endDate!!.time)
+        val trip = TripEntity(
+            destination = destination,
+            country = country,
+            startDate = dateFormat.format(startDate!!.time),
+            endDate = dateFormat.format(endDate!!.time),
+            travelers = travelers,
+            notes = notes
+        )
 
-        Toast.makeText(
-            this,
-            "Trip details are valid! $destination, $country\n" +
-                    "$formattedStartDate - $formattedEndDate\n" +
-                    "Travelers: $travelers",
-            Toast.LENGTH_LONG
-        ).show()
+        saveTrip(trip)
+    }
 
-        // The trip will be saved permanently after we add the Room database.
+    private fun saveTrip(trip: TripEntity) {
+        lifecycleScope.launch {
+            try {
+                repository.insertTrip(trip)
+
+                Toast.makeText(
+                    this@NewTripActivity,
+                    "Trip saved successfully!",
+                    Toast.LENGTH_LONG
+                ).show()
+
+                finish()
+            } catch (exception: Exception) {
+                Toast.makeText(
+                    this@NewTripActivity,
+                    "Could not save the trip. Please try again.",
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 }

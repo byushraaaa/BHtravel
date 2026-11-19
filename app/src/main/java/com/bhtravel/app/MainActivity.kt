@@ -15,8 +15,13 @@ class MainActivity : AppCompatActivity() {
         val btnNewTrip = findViewById<TextView>(R.id.btnNewTrip)
 
         btnNewTrip.setOnClickListener {
-            val intent = Intent(this, NewTripActivity::class.java)
-            startActivity(intent)
+            startActivity(Intent(this, NewTripActivity::class.java))
+        }
+
+        val navTrips = findViewById<TextView>(R.id.navTrips)
+
+        navTrips.setOnClickListener {
+            startActivity(Intent(this, TripsActivity::class.java))
         }
     }
 }
