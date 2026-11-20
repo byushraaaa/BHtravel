@@ -1,11 +1,15 @@
 
 package com.bhtravel.app
 
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.view.Gravity
 import android.view.View
+import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.TextView
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.bhtravel.app.data.database.DatabaseProvider
@@ -60,6 +64,7 @@ class TripsActivity : AppCompatActivity() {
     }
 
     private fun createTripCard(trip: TripEntity): MaterialCardView {
+
         val card = MaterialCardView(this).apply {
             radius = dp(18).toFloat()
             cardElevation = dp(3).toFloat()
@@ -108,13 +113,113 @@ class TripsActivity : AppCompatActivity() {
         content.addView(travelers)
 
         if (trip.notes.isNotBlank()) {
-            content.addView(
-                createDetailText("📝  ${trip.notes}")
-            )
+            content.addView(createDetailText("📝  ${trip.notes}"))
         }
 
+        // Edit and Delete buttons
+        val buttonRow = LinearLayout(this).apply {
+            orientation = LinearLayout.HORIZONTAL
+            gravity = Gravity.CENTER_VERTICAL
+            setPadding(0, dp(12), 0, 0)
+        }
+
+        val editButton = Button(this).apply {
+            text = "Edit"
+            setTextColor(0xFFFFFFFF.toInt())
+            setBackgroundColor(0xFF159A9C.toInt())
+
+            setOnClickListener {
+                openEditTrip(trip)
+            }
+
+            layoutParams = LinearLayout.LayoutParams(
+                0,
+                dp(48),
+                1f
+            ).apply {
+                marginEnd = dp(8)
+            }
+        }
+
+        val deleteButton = Button(this).apply {
+            text = "Delete"
+            setTextColor(0xFFFFFFFF.toInt())
+            setBackgroundColor(0xFFD9534F.toInt())
+
+            setOnClickListener {
+                showDeleteConfirmation(trip)
+            }
+
+            layoutParams = LinearLayout.LayoutParams(
+                0,
+                dp(48),
+                1f
+            ).apply {
+                marginStart = dp(8)
+            }
+        }
+
+        buttonRow.addView(editButton)
+        buttonRow.addView(deleteButton)
+        content.addView(buttonRow)
+
+        // Open in Maps button
+        val mapsButton = Button(this).apply {
+            text = "📍  Open in Maps"
+            setTextColor(0xFFFFFFFF.toInt())
+            setBackgroundColor(0xFF17324D.toInt())
+
+            setOnClickListener {
+                openInMaps(trip)
+            }
+
+            layoutParams = LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                dp(48)
+            ).apply {
+                topMargin = dp(8)
+            }
+        }
+
+        content.addView(mapsButton)
+
         card.addView(content)
+
         return card
+    }
+
+    private fun openEditTrip(trip: TripEntity) {
+        val intent = Intent(this, NewTripActivity::class.java)
+        intent.putExtra(NewTripActivity.EXTRA_TRIP_ID, trip.id)
+        startActivity(intent)
+    }
+
+    // Open Google Maps through the browser
+    private fun openInMaps(trip: TripEntity) {
+        val location = "${trip.destination}, ${trip.country}"
+
+        val mapsUrl =
+            "https://www.google.com/maps/search/?api=1&query=${Uri.encode(location)}"
+
+        val mapIntent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse(mapsUrl)
+        )
+
+        startActivity(mapIntent)
+    }
+
+    private fun showDeleteConfirmation(trip: TripEntity) {
+        AlertDialog.Builder(this)
+            .setTitle("Delete trip")
+            .setMessage(
+                "Are you sure you want to delete ${trip.destination}?"
+            )
+            .setNegativeButton("Cancel", null)
+            .setPositiveButton("Delete") { _, _ ->
+                tripViewModel.deleteTrip(trip)
+            }
+            .show()
     }
 
     private fun createDetailText(value: String): TextView {

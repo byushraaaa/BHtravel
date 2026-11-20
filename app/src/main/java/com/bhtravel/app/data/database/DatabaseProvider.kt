@@ -1,3 +1,4 @@
+
 package com.bhtravel.app.data.database
 
 import android.content.Context
@@ -14,7 +15,11 @@ object DatabaseProvider {
                 context.applicationContext,
                 TripDatabase::class.java,
                 "bhtravel_database"
-            ).build()
+            )
+                .addMigrations(
+                    TripDatabase.MIGRATION_1_2,
+                    TripDatabase.MIGRATION_2_3
+                )                .build()
 
             INSTANCE = instance
             instance

@@ -18,6 +18,10 @@ import java.util.Locale
 
 class NewTripActivity : AppCompatActivity() {
 
+    companion object {
+        const val EXTRA_TRIP_ID = "trip_id"
+    }
+
     private lateinit var etDestination: EditText
     private lateinit var etCountry: EditText
     private lateinit var etTravelers: EditText
@@ -25,13 +29,16 @@ class NewTripActivity : AppCompatActivity() {
 
     private lateinit var btnStartDate: Button
     private lateinit var btnEndDate: Button
+    private lateinit var btnSaveTrip: Button
 
     private lateinit var repository: TripRepository
 
     private var startDate: Calendar? = null
     private var endDate: Calendar? = null
+    private var editingTripId: Int = 0
 
-    private val dateFormat = SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH)
+    private val dateFormat =
+        SimpleDateFormat("dd MMM yyyy", Locale.ENGLISH)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -44,12 +51,19 @@ class NewTripActivity : AppCompatActivity() {
 
         btnStartDate = findViewById(R.id.btnStartDate)
         btnEndDate = findViewById(R.id.btnEndDate)
+        btnSaveTrip = findViewById(R.id.btnSaveTrip)
+
+        val btnCancelTrip = findViewById<Button>(R.id.btnCancelTrip)
 
         val database = DatabaseProvider.getDatabase(applicationContext)
         repository = TripRepository(database.tripDao())
 
-        val btnSaveTrip = findViewById<Button>(R.id.btnSaveTrip)
-        val btnCancelTrip = findViewById<Button>(R.id.btnCancelTrip)
+        editingTripId = intent.getIntExtra(EXTRA_TRIP_ID, 0)
+
+        if (editingTripId != 0) {
+            btnSaveTrip.text = "Update Trip"
+            loadTrip(editingTripId)
+        }
 
         btnStartDate.setOnClickListener {
             showDatePicker(isStartDate = true)
@@ -68,13 +82,57 @@ class NewTripActivity : AppCompatActivity() {
         }
     }
 
+    private fun loadTrip(tripId: Int) {
+        lifecycleScope.launch {
+            try {
+                val trip = repository.getTripById(tripId)
+
+                if (trip == null) {
+                    Toast.makeText(
+                        this@NewTripActivity,
+                        "Trip not found.",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    finish()
+                    return@launch
+                }
+
+                etDestination.setText(trip.destination)
+                etCountry.setText(trip.country)
+                etTravelers.setText(trip.travelers.toString())
+                etNotes.setText(trip.notes)
+
+                startDate = Calendar.getInstance().apply {
+                    time = dateFormat.parse(trip.startDate)!!
+                }
+
+                endDate = Calendar.getInstance().apply {
+                    time = dateFormat.parse(trip.endDate)!!
+                }
+
+                btnStartDate.text = trip.startDate
+                btnEndDate.text = trip.endDate
+
+            } catch (exception: Exception) {
+                Toast.makeText(
+                    this@NewTripActivity,
+                    "Could not load the trip.",
+                    Toast.LENGTH_LONG
+                ).show()
+                finish()
+            }
+        }
+    }
+
     private fun showDatePicker(isStartDate: Boolean) {
         val selectedDate = if (isStartDate) startDate else endDate
-        val calendar = (selectedDate ?: Calendar.getInstance()).clone() as Calendar
+        val calendar =
+            (selectedDate ?: Calendar.getInstance()).clone() as Calendar
 
         val datePicker = DatePickerDialog(
             this,
             { _, year, month, dayOfMonth ->
+
                 val chosenDate = Calendar.getInstance().apply {
                     set(year, month, dayOfMonth, 0, 0, 0)
                     set(Calendar.MILLISECOND, 0)
@@ -82,16 +140,22 @@ class NewTripActivity : AppCompatActivity() {
 
                 if (isStartDate) {
                     startDate = chosenDate
-                    btnStartDate.text = dateFormat.format(chosenDate.time)
+                    btnStartDate.text =
+                        dateFormat.format(chosenDate.time)
 
-                    if (endDate != null && endDate!!.before(chosenDate)) {
+                    if (endDate != null &&
+                        endDate!!.before(chosenDate)
+                    ) {
                         endDate = null
                         btnEndDate.text = "Choose end date"
                     }
+
                 } else {
                     val chosenStartDate = startDate
 
-                    if (chosenStartDate != null && chosenDate.before(chosenStartDate)) {
+                    if (chosenStartDate != null &&
+                        chosenDate.before(chosenStartDate)
+                    ) {
                         Toast.makeText(
                             this,
                             "End date cannot be before start date.",
@@ -99,7 +163,8 @@ class NewTripActivity : AppCompatActivity() {
                         ).show()
                     } else {
                         endDate = chosenDate
-                        btnEndDate.text = dateFormat.format(chosenDate.time)
+                        btnEndDate.text =
+                            dateFormat.format(chosenDate.time)
                     }
                 }
             },
@@ -109,7 +174,8 @@ class NewTripActivity : AppCompatActivity() {
         )
 
         if (!isStartDate && startDate != null) {
-            datePicker.datePicker.minDate = startDate!!.timeInMillis
+            datePicker.datePicker.minDate =
+                startDate!!.timeInMillis
         }
 
         datePicker.show()
@@ -134,12 +200,20 @@ class NewTripActivity : AppCompatActivity() {
         }
 
         if (startDate == null) {
-            Toast.makeText(this, "Please choose a start date.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                "Please choose a start date.",
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
 
         if (endDate == null) {
-            Toast.makeText(this, "Please choose an end date.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(
+                this,
+                "Please choose an end date.",
+                Toast.LENGTH_SHORT
+            ).show()
             return
         }
 
@@ -161,6 +235,7 @@ class NewTripActivity : AppCompatActivity() {
         }
 
         val trip = TripEntity(
+            id = editingTripId,
             destination = destination,
             country = country,
             startDate = dateFormat.format(startDate!!.time),
@@ -175,15 +250,26 @@ class NewTripActivity : AppCompatActivity() {
     private fun saveTrip(trip: TripEntity) {
         lifecycleScope.launch {
             try {
-                repository.insertTrip(trip)
+                if (editingTripId == 0) {
+                    repository.insertTrip(trip)
 
-                Toast.makeText(
-                    this@NewTripActivity,
-                    "Trip saved successfully!",
-                    Toast.LENGTH_LONG
-                ).show()
+                    Toast.makeText(
+                        this@NewTripActivity,
+                        "Trip saved successfully!",
+                        Toast.LENGTH_LONG
+                    ).show()
+                } else {
+                    repository.updateTrip(trip)
+
+                    Toast.makeText(
+                        this@NewTripActivity,
+                        "Trip updated successfully!",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
 
                 finish()
+
             } catch (exception: Exception) {
                 Toast.makeText(
                     this@NewTripActivity,
